@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>門市原廠進貨查詢</title>
-  <link rel="stylesheet" href="/styles.css?v=20260515f">
+  <link rel="stylesheet" href="styles.css?v=20260515f">
 </head>
 <body>
   <main class="app-shell">
     <header class="topbar">
       <div>
-        <div class="eyebrow">ORIGINAL PURCHASE QUERY</div>
+        <div class="eyebrow">Inventory · 進貨</div>
         <h1>門市原廠進貨查詢</h1>
       </div>
     </header>
@@ -84,78 +84,43 @@
       </div>
 
       <div id="layoutPanel" class="lp-panel lp-collapsed">
-        <div class="lp-grid">
-          <div class="lp-section-title">列印位置</div>
-          <div class="lp-field">
-            <label class="lp-label" for="lpOffsetX">水平偏移 mm</label>
-            <input type="number" id="lpOffsetX" value="0" min="-20" max="20" step="0.5">
+        <div class="lp-row">
+          <div class="lp-row-title">列印位置</div>
+          <div class="lp-row-fields">
+            <label class="lp-field"><span>水平偏移 mm</span><input type="number" id="lpOffsetX" value="0" min="-20" max="20" step="0.5"></label>
+            <label class="lp-field"><span>垂直偏移 mm</span><input type="number" id="lpOffsetY" value="7" min="-10" max="30" step="0.5"></label>
           </div>
-          <div class="lp-field">
-            <label class="lp-label" for="lpOffsetY">垂直偏移 mm</label>
-            <input type="number" id="lpOffsetY" value="7" min="-10" max="30" step="0.5">
+        </div>
+        <div class="lp-row">
+          <div class="lp-row-title">文字位置</div>
+          <div class="lp-row-fields">
+            <label class="lp-field"><span>左側位置 mm</span><input type="number" id="lpLeftPad" value="5" min="0" max="15" step="0.5"></label>
+            <label class="lp-field"><span>右側位置 mm</span><input type="number" id="lpRightPad" value="6" min="0" max="15" step="0.5"></label>
+            <label class="lp-field"><span>第一行上距 mm</span><input type="number" id="lpFirstTop" value="2" min="0" max="8" step="0.5"></label>
+            <label class="lp-field"><span>內容整體下移 mm</span><input type="number" id="lpContentTop" value="2" min="0" max="8" step="0.5"></label>
           </div>
-          <div class="lp-field"></div>
-          <div class="lp-field"></div>
-          <div class="lp-section-title">文字位置</div>
-          <div class="lp-field">
-            <label class="lp-label" for="lpLeftPad">左側位置 mm</label>
-            <input type="number" id="lpLeftPad" value="5" min="0" max="15" step="0.5">
+        </div>
+        <div class="lp-row">
+          <div class="lp-row-title">字級</div>
+          <div class="lp-row-fields">
+            <label class="lp-field"><span>第一行 pt</span><input type="number" id="lpFont1" value="10" min="6" max="16" step="0.5"></label>
+            <label class="lp-field"><span>第二行 pt</span><input type="number" id="lpFont2" value="10" min="6" max="16" step="0.5"></label>
+            <label class="lp-field"><span>週數 pt</span><input type="number" id="lpWeekFont" value="5" min="3" max="10" step="0.5"></label>
+            <label class="lp-field"><span>週數上距 mm</span><input type="number" id="lpWeekTop" value="1" min="0" max="8" step="0.5"></label>
+            <label class="lp-field"><span>週數右距 mm</span><input type="number" id="lpWeekRight" value="1.5" min="0" max="8" step="0.5"></label>
           </div>
-          <div class="lp-field">
-            <label class="lp-label" for="lpRightPad">右側位置 mm</label>
-            <input type="number" id="lpRightPad" value="6" min="0" max="15" step="0.5">
+        </div>
+        <div class="lp-row">
+          <div class="lp-row-title">905 浮水印</div>
+          <div class="lp-row-fields">
+            <label class="lp-field"><span>字級 pt</span><input type="number" id="lpWmSize" value="13" min="5" max="24" step="0.5"></label>
+            <label class="lp-field"><span>透明度</span><input type="number" id="lpWmOpacity" value="0.35" min="0.05" max="1" step="0.05"></label>
+            <label class="lp-field"><span>水平 %</span><input type="number" id="lpWmX" value="50" min="0" max="100" step="5"></label>
+            <label class="lp-field"><span>垂直 %</span><input type="number" id="lpWmY" value="50" min="0" max="100" step="5"></label>
           </div>
-          <div class="lp-field">
-            <label class="lp-label" for="lpFirstTop">第一行上距 mm</label>
-            <input type="number" id="lpFirstTop" value="2" min="0" max="8" step="0.5">
-          </div>
-          <div class="lp-field">
-            <label class="lp-label" for="lpContentTop">內容整體下移 mm</label>
-            <input type="number" id="lpContentTop" value="2" min="0" max="8" step="0.5">
-          </div>
-          <div class="lp-section-title">字級</div>
-          <div class="lp-field">
-            <label class="lp-label" for="lpFont1">第一行字級 pt</label>
-            <input type="number" id="lpFont1" value="10" min="6" max="16" step="0.5">
-          </div>
-          <div class="lp-field">
-            <label class="lp-label" for="lpFont2">第二行字級 pt</label>
-            <input type="number" id="lpFont2" value="10" min="6" max="16" step="0.5">
-          </div>
-          <div class="lp-field">
-            <label class="lp-label" for="lpWeekFont">週數字級 pt</label>
-            <input type="number" id="lpWeekFont" value="5" min="3" max="10" step="0.5">
-          </div>
-          <div class="lp-field">
-            <label class="lp-label" for="lpWeekTop">週數上距 mm</label>
-            <input type="number" id="lpWeekTop" value="1" min="0" max="8" step="0.5">
-          </div>
-          <div class="lp-field">
-            <label class="lp-label" for="lpWeekRight">週數右距 mm</label>
-            <input type="number" id="lpWeekRight" value="1.5" min="0" max="8" step="0.5">
-          </div>
-          <div class="lp-field"></div>
-          <div class="lp-field"></div>
-          <div class="lp-section-title">905 浮水印</div>
-          <div class="lp-field">
-            <label class="lp-label" for="lpWmSize">字級 pt</label>
-            <input type="number" id="lpWmSize" value="13" min="5" max="24" step="0.5">
-          </div>
-          <div class="lp-field">
-            <label class="lp-label" for="lpWmOpacity">透明度</label>
-            <input type="number" id="lpWmOpacity" value="0.35" min="0.05" max="1" step="0.05">
-          </div>
-          <div class="lp-field">
-            <label class="lp-label" for="lpWmX">水平位置 %</label>
-            <input type="number" id="lpWmX" value="50" min="0" max="100" step="5">
-          </div>
-          <div class="lp-field">
-            <label class="lp-label" for="lpWmY">垂直位置 %</label>
-            <input type="number" id="lpWmY" value="50" min="0" max="100" step="5">
-          </div>
-          <div class="lp-actions">
-            <button id="lpResetBtn" class="ghost-btn" type="button">恢復預設</button>
-          </div>
+        </div>
+        <div class="lp-actions">
+          <button id="lpResetBtn" class="ghost-btn" type="button">恢復預設</button>
         </div>
       </div>
 
@@ -167,7 +132,7 @@
     </section>
   </main>
 
-  <script src="/label-logic.js?v=20260515f"></script>
-  <script src="/app.js?v=20260515f"></script>
+  <script src="label-logic.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
