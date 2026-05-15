@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>門市進貨查詢 — 安裝</title>
+  <style>
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background: #f4f6fb; color: #1f2733; line-height: 1.7;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 40px 20px 80px; }
+    .eyebrow { font-size: 13px; letter-spacing: .12em; color: #2f5597; font-weight: 700; }
+    h1 { font-size: 30px; margin: 4px 0 8px; }
+    p.lead { color: #54607a; margin: 0 0 28px; }
+    .card { background: #fff; border: 1px solid #e3e8f2; border-radius: 14px; padding: 24px; margin: 18px 0; }
+    .dl {
+      display: inline-block; background: #2f5597; color: #fff; text-decoration: none;
+      font-size: 18px; font-weight: 700; padding: 16px 28px; border-radius: 10px;
+    }
+    .dl:active { transform: translateY(1px); }
+    ol { padding-left: 22px; margin: 8px 0 0; }
+    li { margin: 10px 0; }
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      background: #eef1f8; border-radius: 6px;
+    }
+    code { padding: 2px 6px; font-size: 14px; }
+    pre { padding: 14px 16px; overflow-x: auto; font-size: 13px; border: 1px solid #e3e8f2; }
+    .note { font-size: 14px; color: #6b7689; }
+    .warn { background: #fff7e6; border-color: #ffe0a3; }
+    h2 { font-size: 18px; margin: 28px 0 6px; }
+    a { color: #2f5597; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="eyebrow">PURCHASE LIVE QUERY</div>
+    <h1>門市進貨查詢</h1>
+    <p class="lead">查 EPB 調撥入庫（APL 主機）。同事的門市電腦已裝 800AB/EPB，不需另外裝任何大型軟體。</p>
+
+    <div class="card">
+      <a class="dl" href="https://raw.githubusercontent.com/samwang38/store-in/main/%E5%95%9F%E5%8B%95%E9%96%80%E5%B8%82%E9%80%B2%E8%B2%A8%E6%9F%A5%E8%A9%A2.command" download="啟動門市進貨查詢.command">⬇ 下載啟動檔</a>
+      <p class="note" style="margin:14px 0 0;">下載後雙擊即可，會自動安裝到桌面並自動更新。</p>
+    </div>
+
+    <h2>使用步驟</h2>
+    <div class="card">
+      <ol>
+        <li><b>連上公司 VPN</b>（需能連到 192.168.1.177）</li>
+        <li>雙擊剛下載的 <code>啟動門市進貨查詢.command</code><br>
+          <span class="note">首次會被 macOS 攔下：在檔案上<b>按右鍵 →「打開」→ 再按「打開」</b>一次即可（之後從桌面雙擊不會再跳）。</span></li>
+        <li>稍候會<b>自動開啟瀏覽器</b> <code>http://127.0.0.1:8781/</code>，選我方倉與日期即可查詢、下載 Excel。</li>
+      </ol>
+      <p class="note">關閉黑色終端機視窗即停止。下次直接雙擊<b>桌面資料夾「門市進貨查詢-app」</b>裡的同名檔，會自動更新到最新版。</p>
+    </div>
+
+    <h2>進階：用指令安裝（備援）</h2>
+    <div class="card">
+      <p class="note" style="margin-top:0;">若雙擊方式不順，可開「終端機」貼上這行：</p>
+      <pre>curl -fsSL https://raw.githubusercontent.com/samwang38/store-in/main/install.sh | bash</pre>
+    </div>
+
+    <div class="card warn">
+      <b>固定查詢條件</b>（比照系統匯出，無法在畫面更改）：調撥入庫 INVTRNIN｜來源倉 SA099 總公司倉｜APL 主機（類別1 含 1003/1001、類別2 = 2001、類別3 = 3001）。可調整的只有「我方倉」與「日期」。
+    </div>
+  </div>
+</body>
+</html>

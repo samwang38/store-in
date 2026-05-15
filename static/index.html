@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>門市進貨查詢</title>
+  <link rel="stylesheet" href="/styles.css?v=20260515b">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">PURCHASE LIVE QUERY</div>
+        <h1>門市進貨查詢</h1>
+      </div>
+    </header>
+
+    <section class="module-view" id="purchaseModule">
+      <section class="inventory-filter-panel">
+        <div class="field store-field">
+          <label for="storeId1">我方倉</label>
+          <select id="storeId1"></select>
+        </div>
+        <div class="field">
+          <label for="startDate">起始日</label>
+          <input id="startDate" type="date">
+        </div>
+        <div class="field">
+          <label for="endDate">結束日</label>
+          <input id="endDate" type="date">
+        </div>
+        <div class="inventory-actions">
+          <button id="clearBtn" class="ghost-btn" type="button">清除</button>
+          <button id="downloadBtn" class="ghost-btn" type="button">下載 Excel</button>
+          <button id="searchBtn" class="primary-btn" type="button">查詢進貨</button>
+        </div>
+        <p id="message" class="inventory-message">固定條件：調撥入庫 INVTRNIN｜來源倉 SA099 總公司倉｜APL主機（類別1 含 1003/1001、類別2 = 2001、類別3 = 3001）</p>
+      </section>
+
+      <section class="inventory-result-panel">
+        <div class="result-heading">
+          <h2>查詢結果</h2>
+          <span id="resultCount">0 筆</span>
+        </div>
+        <div class="inventory-table-wrap">
+          <table class="inventory-table">
+            <thead>
+              <tr>
+                <th>單據日期</th>
+                <th>來源單據代碼</th>
+                <th>品牌代碼</th>
+                <th>存貨代碼</th>
+                <th>型號</th>
+                <th>存貨名稱</th>
+                <th>存貨數量</th>
+                <th>來源倉</th>
+              </tr>
+            </thead>
+            <tbody id="resultBody">
+              <tr><td colspan="8" class="empty">輸入條件後按「查詢進貨」。</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="/app.js?v=20260515b"></script>
+</body>
+</html>
