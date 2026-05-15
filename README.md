@@ -31,11 +31,11 @@ curl -fsSL https://raw.githubusercontent.com/samwang38/store-in/main/install.sh 
 | OS | macOS |
 | Python | 3.8 以上 |
 | JDK | 1.8（`/Library/Java/JavaVirtualMachines/jdk1.8.0_251.jdk`）|
-| EPBrowser lib | `/Library/EPBrowser/EPB/Shell/`（裝過 800AB/EPB 即有）|
+| EPBrowser lib | `/Library/EPBrowser/EPB/Shell/`（裝過 EPB 即有）|
 | 網路 | 公司 VPN（192.168.1.177:8080）|
 | Python 套件 | `openpyxl`（啟動檔會自動安裝）|
 
-> 店機已裝 800AB/EPB，故 Java 與 EPB 元件皆現成；啟動檔只會額外抓本小程式與 `openpyxl`。
+> 店機已裝 EPB，故 Java 與 EPB 元件皆現成；啟動檔只會額外抓本小程式與 `openpyxl`。
 
 ## 免登入
 
