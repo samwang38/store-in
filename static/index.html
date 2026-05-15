@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>門市原廠進貨查詢</title>
-  <link rel="stylesheet" href="/styles.css?v=20260515c">
+  <link rel="stylesheet" href="/styles.css?v=20260515d">
 </head>
 <body>
   <main class="app-shell">
@@ -40,7 +40,10 @@
       <section class="inventory-result-panel">
         <div class="result-heading">
           <h2>查詢結果</h2>
-          <span id="resultCount">0 筆</span>
+          <div class="result-heading-right">
+            <span id="resultCount">0 筆</span>
+            <button id="labelBtn" class="ghost-btn" type="button" disabled>產生標籤</button>
+          </div>
         </div>
         <div class="inventory-table-wrap">
           <table class="inventory-table">
@@ -63,8 +66,30 @@
         </div>
       </section>
     </section>
+
+    <section id="labelPanel" class="label-panel hidden">
+      <div class="label-panel-header">
+        <div class="label-panel-title">
+          <h2>標籤預覽</h2>
+          <span id="labelCount"></span>
+        </div>
+        <div class="label-panel-controls">
+          <label class="label-control-item">起始格 <input id="labelStartPos" type="number" min="1" max="95" value="1" class="label-num-input"></label>
+          <label class="label-control-item">週數 <input id="labelWeekInput" type="text" value="" placeholder="W20" class="label-week-input"></label>
+          <label class="label-control-item label-checkbox"><input id="labelBorder" type="checkbox"> 框線</label>
+          <button id="printBtn" class="primary-btn" type="button">列印</button>
+          <button id="closeLabelBtn" class="ghost-btn" type="button">關閉</button>
+        </div>
+      </div>
+      <div class="label-sheet-wrap">
+        <div id="labelPrintArea">
+          <div class="label-sheet" id="labelSheet"></div>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <script src="/app.js?v=20260515c"></script>
+  <script src="/label-logic.js?v=20260515d"></script>
+  <script src="/app.js?v=20260515d"></script>
 </body>
 </html>

@@ -1106,3 +1106,194 @@ td.sheet2-focus.value-negative {
     min-width: 156px;
   }
 }
+
+/* ─── 查詢結果標題列右側 ──────────────────── */
+.result-heading-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ─── 標籤面板（螢幕版）─────────────────── */
+.label-panel {
+  margin-top: 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.label-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, #f9fcfe, #edf5fb);
+}
+
+.label-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.label-panel-title h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+#labelCount {
+  background: var(--blue-soft);
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 850;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--blue-mid);
+}
+
+.label-panel-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.label-control-item {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 850;
+  color: #25323d;
+  cursor: default;
+}
+
+.label-checkbox {
+  cursor: pointer;
+}
+
+.label-num-input,
+.label-week-input {
+  width: 68px !important;
+  min-height: 34px !important;
+  text-align: center !important;
+  font-size: 14px !important;
+  font-weight: 900 !important;
+  padding: 0 6px !important;
+}
+
+.label-week-input {
+  width: 60px !important;
+}
+
+.label-sheet-wrap {
+  overflow-x: auto;
+  padding: 20px;
+  background: #dde3ea;
+}
+
+/* ─── 標籤 CSS（與 label.html 完全一致）─── */
+#labelPrintArea {
+  --offset-x: 0mm;
+  --offset-y: 7mm;
+  --label-left-pad: 5mm;
+  --label-right-pad: 6mm;
+  --label-first-font: 10pt;
+  --label-second-font: 10pt;
+  --label-week-font: 5pt;
+  --label-first-top: 2mm;
+  --label-content-top: 2mm;
+  --label-week-top: 1mm;
+  --label-week-right: 1.5mm;
+  --watermark-size: 13pt;
+  --watermark-opacity: .35;
+  --watermark-x: 50%;
+  --watermark-y: 50%;
+}
+
+.label-sheet { width: 210mm; font-family: Arial, 'Noto Sans TC', sans-serif; }
+.label-page { width: 210mm; padding-top: var(--offset-y, 7mm); margin-left: var(--offset-x, 0mm); page-break-after: always; background: #fff; margin-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.12); }
+.label-page:last-child { page-break-after: auto; }
+.label-row-grid { display: flex; width: 210mm; height: 15mm; }
+.label-cell {
+  position: relative;
+  width: 42mm;
+  height: 15mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+  padding-top: var(--label-content-top, 2mm);
+}
+.label-cell.has-border { border: 0.3px solid #aaa; }
+.label-line { display: flex; justify-content: space-between; align-items: baseline; height: 50%; line-height: 1; }
+.label-line.primary { padding-top: var(--label-first-top, 2mm); }
+.label-line.primary .label-left,
+.label-line.primary .label-right { font-size: var(--label-first-font, 10pt); }
+.label-line.secondary .label-left,
+.label-line.secondary .label-right { font-size: var(--label-second-font, 10pt); }
+.label-watermark {
+  position: absolute;
+  top: var(--watermark-y, 50%);
+  left: var(--watermark-x, 50%);
+  transform: translate(-50%, -50%);
+  font-size: var(--watermark-size, 13pt);
+  font-weight: bold;
+  color: rgba(0, 0, 0, var(--watermark-opacity, .35));
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 0;
+  letter-spacing: 1px;
+}
+.label-week {
+  position: absolute;
+  top: var(--label-week-top, 1mm);
+  right: var(--label-week-right, 1.5mm);
+  font-size: var(--label-week-font, 5pt);
+  color: #000;
+  font-weight: normal;
+  pointer-events: none;
+  z-index: 1;
+}
+.label-left {
+  font-size: var(--label-second-font, 10pt);
+  font-weight: bold;
+  padding-left: var(--label-left-pad, 5mm);
+  white-space: nowrap;
+  overflow: hidden;
+  color: #000;
+  text-transform: uppercase;
+}
+.label-right {
+  font-size: var(--label-second-font, 10pt);
+  font-weight: bold;
+  padding-right: var(--label-right-pad, 6mm);
+  white-space: nowrap;
+  text-align: right;
+  color: #000;
+}
+
+/* ─── 列印：只印標籤頁 ─────────────────── */
+@media print {
+  body.print-labels * { visibility: hidden; }
+  body.print-labels .label-sheet-wrap,
+  body.print-labels .label-sheet-wrap * { visibility: visible; }
+  body.print-labels .label-sheet-wrap {
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 0;
+    background: none;
+    overflow: visible;
+  }
+  body.print-labels .label-page {
+    box-shadow: none;
+    margin-bottom: 0;
+  }
+}
