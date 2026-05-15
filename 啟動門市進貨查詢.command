@@ -87,7 +87,11 @@ echo "-------------------------------------------"
 
 # 伺服器起來後自動開瀏覽器
 ( for i in $(seq 1 20); do
-    if curl -s -o /dev/null "$URL"; then open "$URL"; break; fi
+    if curl -s -o /dev/null "$URL"; then
+      if open -a "Google Chrome" "$URL" 2>/dev/null; then :
+      else open "$URL"; fi
+      break
+    fi
     sleep 0.5
   done ) &
 
