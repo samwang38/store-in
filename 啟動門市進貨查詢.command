@@ -9,6 +9,22 @@ URL="http://127.0.0.1:$PORT/"
 
 cd "$(dirname "$0")"
 
+# ── 設定自訂圖示（背景執行，不阻塞啟動）─────────────────────
+_set_icon() {
+  local dir icon self
+  dir="$(cd "$(dirname "$0")" && pwd)"
+  self="$dir/$(basename "$0")"
+  icon="$dir/app_icon.png"
+  [ -f "$icon" ] || return 0
+  ( osascript <<APPLESCRIPT 2>/dev/null
+use framework "AppKit"
+set img to (current application's NSImage's alloc()'s initWithContentsOfFile:"$icon")
+(current application's NSWorkspace's sharedWorkspace()'s setIcon:img forFile:"$self" options:0)
+APPLESCRIPT
+  ) &
+}
+_set_icon
+
 echo "=== 門市進貨查詢 ==="
 echo ""
 

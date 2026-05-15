@@ -40,6 +40,11 @@ const el = {
   lpWeekRight: document.getElementById("lpWeekRight"),
   lpResetBtn: document.getElementById("lpResetBtn"),
   labelPrintArea: document.getElementById("labelPrintArea"),
+  // 905 浮水印
+  lpWmSize: document.getElementById("lpWmSize"),
+  lpWmOpacity: document.getElementById("lpWmOpacity"),
+  lpWmX: document.getElementById("lpWmX"),
+  lpWmY: document.getElementById("lpWmY"),
 };
 
 const FIXED_HINT = "固定條件：調撥入庫 INVTRNIN｜來源倉 SA099 總公司倉｜原廠 APL 主機（類別1 含 1003/1001、類別2 = 2001、類別3 = 3001）";
@@ -212,6 +217,7 @@ const DEFAULT_LAYOUT = {
   firstTop: 2, contentTop: 2,
   font1: 10, font2: 10,
   weekFont: 5, weekTop: 1, weekRight: 1.5,
+  wmSize: 13, wmOpacity: 0.35, wmX: 50, wmY: 50,
 };
 
 function applyLayout(layout) {
@@ -227,6 +233,10 @@ function applyLayout(layout) {
     "--label-week-font": layout.weekFont + "pt",
     "--label-week-top": layout.weekTop + "mm",
     "--label-week-right": layout.weekRight + "mm",
+    "--watermark-size": layout.wmSize + "pt",
+    "--watermark-opacity": String(layout.wmOpacity),
+    "--watermark-x": layout.wmX + "%",
+    "--watermark-y": layout.wmY + "%",
   };
   for (const [k, v] of Object.entries(vars)) {
     el.labelPrintArea.style.setProperty(k, v);
@@ -246,6 +256,10 @@ function readLayout() {
     weekFont:   parseFloat(el.lpWeekFont.value)   || 5,
     weekTop:    parseFloat(el.lpWeekTop.value)    || 0,
     weekRight:  parseFloat(el.lpWeekRight.value)  || 0,
+    wmSize:     parseFloat(el.lpWmSize.value)     || 13,
+    wmOpacity:  parseFloat(el.lpWmOpacity.value)  || 0.35,
+    wmX:        parseFloat(el.lpWmX.value)        || 50,
+    wmY:        parseFloat(el.lpWmY.value)        || 50,
   };
 }
 
@@ -261,6 +275,10 @@ function fillLayoutInputs(layout) {
   el.lpWeekFont.value   = layout.weekFont;
   el.lpWeekTop.value    = layout.weekTop;
   el.lpWeekRight.value  = layout.weekRight;
+  el.lpWmSize.value     = layout.wmSize;
+  el.lpWmOpacity.value  = layout.wmOpacity;
+  el.lpWmX.value        = layout.wmX;
+  el.lpWmY.value        = layout.wmY;
 }
 
 function saveLayout() {
@@ -380,7 +398,8 @@ async function init() {
   el.layoutToggleBtn.addEventListener("click", toggleLayoutPanel);
   el.lpResetBtn.addEventListener("click", resetLayout);
   for (const input of [el.lpOffsetX, el.lpOffsetY, el.lpLeftPad, el.lpRightPad, el.lpFirstTop,
-      el.lpContentTop, el.lpFont1, el.lpFont2, el.lpWeekFont, el.lpWeekTop, el.lpWeekRight]) {
+      el.lpContentTop, el.lpFont1, el.lpFont2, el.lpWeekFont, el.lpWeekTop, el.lpWeekRight,
+      el.lpWmSize, el.lpWmOpacity, el.lpWmX, el.lpWmY]) {
     input.addEventListener("input", () => { applyLayout(readLayout()); saveLayout(); });
   }
   el.labelStartPos.addEventListener("change", () => {
