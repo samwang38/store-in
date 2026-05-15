@@ -1279,21 +1279,119 @@ td.sheet2-focus.value-negative {
   color: #000;
 }
 
+/* ─── 排版調整面板 ───────────────────────── */
+.lp-toggle-btn {
+  font-size: 13px;
+}
+
+.lp-panel {
+  border-top: 1px solid var(--line);
+  background: #f7fbfe;
+  padding: 14px 18px;
+}
+
+.lp-panel.lp-collapsed {
+  display: none;
+}
+
+.lp-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  gap: 10px 16px;
+}
+
+.lp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.lp-label {
+  display: block !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
+  color: var(--muted) !important;
+  gap: 0 !important;
+}
+
+.lp-field input[type="number"] {
+  width: 100% !important;
+  min-height: 34px !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  text-align: center !important;
+  padding: 0 8px !important;
+}
+
+.lp-actions {
+  display: flex;
+  align-items: flex-end;
+  grid-column: span 1;
+}
+
+.lp-section-title {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--muted);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+@media (max-width: 920px) {
+  .lp-grid {
+    grid-template-columns: repeat(3, minmax(100px, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .lp-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 /* ─── 列印：只印標籤頁 ─────────────────── */
 @media print {
-  body.print-labels * { visibility: hidden; }
-  body.print-labels .label-sheet-wrap,
-  body.print-labels .label-sheet-wrap * { visibility: visible; }
-  body.print-labels .label-sheet-wrap {
-    position: fixed;
-    top: 0;
-    left: 0;
-    padding: 0;
-    background: none;
-    overflow: visible;
+  html, body {
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
+
+  /* 隱藏所有非標籤 UI */
+  body.print-labels .topbar,
+  body.print-labels #purchaseModule,
+  body.print-labels .label-panel-header,
+  body.print-labels .lp-panel {
+    display: none !important;
+  }
+
+  /* 重設包裝元素 */
+  body.print-labels .app-shell {
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  body.print-labels .label-panel {
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+    background: white !important;
+  }
+
+  body.print-labels .label-sheet-wrap {
+    padding: 0 !important;
+    background: none !important;
+    overflow: visible !important;
+  }
+
   body.print-labels .label-page {
-    box-shadow: none;
-    margin-bottom: 0;
+    box-shadow: none !important;
+    margin-bottom: 0 !important;
+    background: white !important;
   }
 }

@@ -24,6 +24,22 @@ const el = {
   labelBorder: document.getElementById("labelBorder"),
   printBtn: document.getElementById("printBtn"),
   closeLabelBtn: document.getElementById("closeLabelBtn"),
+  // 排版調整面板
+  layoutToggleBtn: document.getElementById("layoutToggleBtn"),
+  layoutPanel: document.getElementById("layoutPanel"),
+  lpOffsetX: document.getElementById("lpOffsetX"),
+  lpOffsetY: document.getElementById("lpOffsetY"),
+  lpLeftPad: document.getElementById("lpLeftPad"),
+  lpRightPad: document.getElementById("lpRightPad"),
+  lpFirstTop: document.getElementById("lpFirstTop"),
+  lpContentTop: document.getElementById("lpContentTop"),
+  lpFont1: document.getElementById("lpFont1"),
+  lpFont2: document.getElementById("lpFont2"),
+  lpWeekFont: document.getElementById("lpWeekFont"),
+  lpWeekTop: document.getElementById("lpWeekTop"),
+  lpWeekRight: document.getElementById("lpWeekRight"),
+  lpResetBtn: document.getElementById("lpResetBtn"),
+  labelPrintArea: document.getElementById("labelPrintArea"),
 };
 
 const FIXED_HINT = "固定條件：調撥入庫 INVTRNIN｜來源倉 SA099 總公司倉｜原廠 APL 主機（類別1 含 1003/1001、類別2 = 2001、類別3 = 3001）";
@@ -187,6 +203,95 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+// ─── 排版調整（Layout Panel）────────────────────────────────
+
+const LP_LAYOUT_KEY = "purchaseAppLabelLayout";
+const DEFAULT_LAYOUT = {
+  offsetX: 0, offsetY: 7,
+  leftPad: 5, rightPad: 6,
+  firstTop: 2, contentTop: 2,
+  font1: 10, font2: 10,
+  weekFont: 5, weekTop: 1, weekRight: 1.5,
+};
+
+function applyLayout(layout) {
+  const vars = {
+    "--offset-x": layout.offsetX + "mm",
+    "--offset-y": layout.offsetY + "mm",
+    "--label-left-pad": layout.leftPad + "mm",
+    "--label-right-pad": layout.rightPad + "mm",
+    "--label-first-top": layout.firstTop + "mm",
+    "--label-content-top": layout.contentTop + "mm",
+    "--label-first-font": layout.font1 + "pt",
+    "--label-second-font": layout.font2 + "pt",
+    "--label-week-font": layout.weekFont + "pt",
+    "--label-week-top": layout.weekTop + "mm",
+    "--label-week-right": layout.weekRight + "mm",
+  };
+  for (const [k, v] of Object.entries(vars)) {
+    el.labelPrintArea.style.setProperty(k, v);
+  }
+}
+
+function readLayout() {
+  return {
+    offsetX:    parseFloat(el.lpOffsetX.value)    || 0,
+    offsetY:    parseFloat(el.lpOffsetY.value)    || 0,
+    leftPad:    parseFloat(el.lpLeftPad.value)    || 0,
+    rightPad:   parseFloat(el.lpRightPad.value)   || 0,
+    firstTop:   parseFloat(el.lpFirstTop.value)   || 0,
+    contentTop: parseFloat(el.lpContentTop.value) || 0,
+    font1:      parseFloat(el.lpFont1.value)      || 10,
+    font2:      parseFloat(el.lpFont2.value)      || 10,
+    weekFont:   parseFloat(el.lpWeekFont.value)   || 5,
+    weekTop:    parseFloat(el.lpWeekTop.value)    || 0,
+    weekRight:  parseFloat(el.lpWeekRight.value)  || 0,
+  };
+}
+
+function fillLayoutInputs(layout) {
+  el.lpOffsetX.value    = layout.offsetX;
+  el.lpOffsetY.value    = layout.offsetY;
+  el.lpLeftPad.value    = layout.leftPad;
+  el.lpRightPad.value   = layout.rightPad;
+  el.lpFirstTop.value   = layout.firstTop;
+  el.lpContentTop.value = layout.contentTop;
+  el.lpFont1.value      = layout.font1;
+  el.lpFont2.value      = layout.font2;
+  el.lpWeekFont.value   = layout.weekFont;
+  el.lpWeekTop.value    = layout.weekTop;
+  el.lpWeekRight.value  = layout.weekRight;
+}
+
+function saveLayout() {
+  try {
+    localStorage.setItem(LP_LAYOUT_KEY, JSON.stringify(readLayout()));
+  } catch (_) {}
+}
+
+function loadLayout() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LP_LAYOUT_KEY) || "null");
+    const layout = saved ? {...DEFAULT_LAYOUT, ...saved} : {...DEFAULT_LAYOUT};
+    fillLayoutInputs(layout);
+    applyLayout(layout);
+  } catch (_) {
+    fillLayoutInputs({...DEFAULT_LAYOUT});
+    applyLayout({...DEFAULT_LAYOUT});
+  }
+}
+
+function resetLayout() {
+  fillLayoutInputs({...DEFAULT_LAYOUT});
+  applyLayout({...DEFAULT_LAYOUT});
+  saveLayout();
+}
+
+function toggleLayoutPanel() {
+  const collapsed = el.layoutPanel.classList.toggle("lp-collapsed");
+  el.layoutToggleBtn.textContent = collapsed ? "排版調整 ▾" : "排版調整 ▴";
+}
+
 // ─── 標籤列印 ────────────────────────────────────────────────
 
 function currentWeekLabel() {
@@ -272,6 +377,12 @@ async function init() {
   el.labelBtn.addEventListener("click", generateLabels);
   el.printBtn.addEventListener("click", printLabels);
   el.closeLabelBtn.addEventListener("click", () => el.labelPanel.classList.add("hidden"));
+  el.layoutToggleBtn.addEventListener("click", toggleLayoutPanel);
+  el.lpResetBtn.addEventListener("click", resetLayout);
+  for (const input of [el.lpOffsetX, el.lpOffsetY, el.lpLeftPad, el.lpRightPad, el.lpFirstTop,
+      el.lpContentTop, el.lpFont1, el.lpFont2, el.lpWeekFont, el.lpWeekTop, el.lpWeekRight]) {
+    input.addEventListener("input", () => { applyLayout(readLayout()); saveLayout(); });
+  }
   el.labelStartPos.addEventListener("change", () => {
     if (!el.labelPanel.classList.contains("hidden") && state.currentItems.length) {
       const labels = expandToLabels(state.currentItems);
@@ -295,6 +406,7 @@ async function init() {
   });
   // 設定週數預設值
   el.labelWeekInput.value = currentWeekLabel();
+  loadLayout();
   setMessage("");
   try {
     await loadStores();
