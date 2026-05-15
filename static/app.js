@@ -15,7 +15,7 @@ const el = {
   resultBody: document.getElementById("resultBody"),
 };
 
-const FIXED_HINT = "固定條件：調撥入庫 INVTRNIN｜來源倉 SA099 總公司倉｜APL主機（類別1 含 1003/1001、類別2 = 2001、類別3 = 3001）";
+const FIXED_HINT = "固定條件：調撥入庫 INVTRNIN｜來源倉 SA099 總公司倉｜原廠 APL 主機（類別1 含 1003/1001、類別2 = 2001、類別3 = 3001）";
 
 function pad(value) {
   return String(value).padStart(2, "0");
@@ -43,12 +43,15 @@ function setMessage(message, kind = "info") {
   el.message.classList.toggle("error", kind === "error");
 }
 
+const ALLOWED_STORES = ["SA004", "SA068"];
+
 async function loadStores() {
   const payload = await api("/api/stores");
   el.storeId1.innerHTML = `<option value="">全部倉</option>` + (payload.items || [])
+    .filter((item) => ALLOWED_STORES.includes(item.storeId))
     .map((item) => `<option value="${escapeHtml(item.storeId)}">${escapeHtml(item.storeId)} ${escapeHtml(item.name)}</option>`)
     .join("");
-  state.defaultStore = payload.defaultStore || "";
+  state.defaultStore = payload.defaultStore || "SA004";
   el.storeId1.value = state.defaultStore;
   state.ready = true;
 }
