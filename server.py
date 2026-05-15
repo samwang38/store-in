@@ -330,7 +330,7 @@ class Handler(SimpleHTTPRequestHandler):
 def main():
     compile_java("EPBReportQuery.java")
     port = int(os.environ.get("PORT", "8781"))
-    server = ThreadingHTTPServer(("0.0.0.0", port), Handler)
+    server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
     print(f"Purchase Live Query App: http://127.0.0.1:{port}", flush=True)
     server.serve_forever()
 
