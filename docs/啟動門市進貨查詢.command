@@ -58,9 +58,16 @@ fi
 
 # ── 情況 B：已在 repo 內 → 自動更新 ──────────────────────────
 if command -v git &>/dev/null && [ -d ".git" ]; then
+  VER_BEFORE=$(git log -1 --format="%h %ad" --date=format:"%Y-%m-%d" 2>/dev/null)
+  echo "目前版本：${VER_BEFORE:-（未知）}"
   echo "檢查更新中…"
   if git pull --quiet 2>/dev/null; then
-    echo "已是最新版本。"
+    VER_AFTER=$(git log -1 --format="%h %ad" --date=format:"%Y-%m-%d" 2>/dev/null)
+    if [ "$VER_BEFORE" != "$VER_AFTER" ]; then
+      echo "✓ 已更新 → ${VER_AFTER}"
+    else
+      echo "✓ 已是最新版本。"
+    fi
   else
     echo "（無法連線更新，使用現有版本）"
   fi
