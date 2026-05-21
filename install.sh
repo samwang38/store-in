@@ -37,8 +37,17 @@ else
 fi
 
 # ── 安裝 Python 套件（本工具只需 openpyxl）────────────────────
-echo "安裝必要套件（openpyxl）…"
-pip3 install openpyxl --quiet
+echo "安裝必要套件（openpyxl，使用虛擬環境）…"
+VENV="$DEST/.venv"
+python3 -m venv "$VENV" 2>/dev/null || true
+if [ -x "$VENV/bin/python" ]; then
+  "$VENV/bin/python" -m pip install --quiet --upgrade pip 2>/dev/null || true
+  "$VENV/bin/python" -m pip install --quiet openpyxl
+else
+  # venv 建立失敗時的退路
+  pip3 install --user --break-system-packages --quiet openpyxl 2>/dev/null \
+    || pip3 install --user --quiet openpyxl
+fi
 
 # ── 解除 Gatekeeper 隔離 + 確保可執行 ─────────────────────────
 xattr -dr com.apple.quarantine "$DEST" 2>/dev/null || true

@@ -81,10 +81,34 @@ if ! command -v python3 &>/dev/null; then
   exit 1
 fi
 
+# ── 建立 / 使用虛擬環境（避開新版 Homebrew Python 的 PEP 668 限制）──
+APPDIR="$(cd "$(dirname "$0")" && pwd)"
+VENV="$APPDIR/.venv"
+if [ ! -x "$VENV/bin/python" ]; then
+  echo "首次設定 Python 環境（建立虛擬環境）…"
+  python3 -m venv "$VENV" 2>/dev/null || true
+fi
+if [ -x "$VENV/bin/python" ]; then
+  PY="$VENV/bin/python"
+else
+  PY="python3"   # venv 建立失敗時的退路
+fi
+
 # ── 缺套件才安裝（本工具只需 openpyxl）────────────────────────
-if ! python3 -c "import openpyxl" 2>/dev/null; then
+if ! "$PY" -c "import openpyxl" 2>/dev/null; then
   echo "安裝必要套件中…"
-  pip3 install openpyxl --quiet
+  if [ "$PY" = "python3" ]; then
+    pip3 install --user --break-system-packages --quiet openpyxl 2>/dev/null \
+      || pip3 install --user --quiet openpyxl
+  else
+    "$PY" -m pip install --quiet --upgrade pip 2>/dev/null || true
+    "$PY" -m pip install --quiet openpyxl
+  fi
+fi
+if ! "$PY" -c "import openpyxl" 2>/dev/null; then
+  echo "[錯誤] openpyxl 安裝失敗，請確認網路後重試。"
+  read -p "按 Enter 關閉"
+  exit 1
 fi
 
 echo "啟動伺服器（port $PORT）…"
@@ -102,4 +126,4 @@ echo "-------------------------------------------"
     sleep 0.5
   done ) &
 
-python3 server.py
+"$PY" server.py
