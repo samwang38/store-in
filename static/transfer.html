@@ -1,0 +1,1240 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>門市調撥工具</title>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    :root {
+      --ink: #17212b;
+      --muted: #617083;
+      --line: #d8e0ea;
+      --paper: #fbfcfd;
+      --panel: #ffffff;
+      --blue: #1f5f99;
+      --blue-2: #e7f1fb;
+      --green: #18745b;
+      --green-2: #dff3ea;
+      --amber: #b65f00;
+      --amber-2: #ffe7c7;
+      --red: #b42318;
+      --red-2: #fde4e2;
+      --shadow: 0 18px 48px rgba(24, 39, 56, .10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(31, 95, 153, .05) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(31, 95, 153, .04) 1px, transparent 1px),
+        #f5f7fa;
+      background-size: 34px 34px;
+      font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    }
+
+    .home-link {
+      position: fixed;
+      top: 14px;
+      left: 14px;
+      z-index: 20;
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 7px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, .92);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 800;
+      box-shadow: 0 8px 24px rgba(24, 39, 56, .10);
+    }
+
+    .home-link:hover {
+      border-color: var(--ink);
+    }
+
+    .shell {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 28px 0 44px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: end;
+      margin-bottom: 18px;
+      border-bottom: 2px solid var(--ink);
+      padding-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 46px);
+      line-height: 1;
+      letter-spacing: 0;
+      font-weight: 900;
+    }
+
+    .stamp {
+      border: 2px solid var(--ink);
+      padding: 10px 12px;
+      background: var(--panel);
+      min-width: 160px;
+      text-align: center;
+      box-shadow: 5px 5px 0 var(--ink);
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      background: #eef3f8;
+      border-bottom: 1px solid var(--line);
+      font-weight: 800;
+    }
+
+    .panel-body { padding: 12px; }
+
+    .source-card {
+      display: grid;
+      gap: 6px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #fff, #f7fafc);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .source-card strong {
+      color: var(--ink);
+      font-size: 14px;
+    }
+
+    .data-state {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--line);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .data-state.ready #dataStateText { color: var(--green); }
+    .data-state.loading #dataStateText { color: var(--amber); }
+    .data-state.error #dataStateText { color: var(--red); }
+
+    .link-btn {
+      min-height: 0;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 800;
+      background: #edf2f7;
+      color: var(--ink);
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .link-btn:disabled { opacity: .5; }
+
+    .store-picker {
+      display: grid;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .store-picker label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .store-picker select {
+      width: 100%;
+      min-height: 38px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--ink);
+      background: #fff;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .store-picker select:disabled {
+      color: var(--muted);
+      background: #f3f6f9;
+      cursor: not-allowed;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .scope {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--line);
+    }
+
+    .scope-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--muted);
+      letter-spacing: .03em;
+    }
+
+    .mode-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding: 4px;
+      background: #f4f7fa;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .mode-toggle label {
+      cursor: pointer;
+      text-align: center;
+      padding: 7px 8px;
+      border-radius: 6px;
+      font-weight: 800;
+      color: var(--muted);
+      font-size: 13px;
+      user-select: none;
+    }
+
+    .mode-toggle input[type="radio"] {
+      display: none;
+    }
+
+    .mode-toggle input[type="radio"]:checked + label,
+    .mode-toggle label.active {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 800;
+      min-height: 30px;
+      cursor: pointer;
+    }
+
+    .chip:hover {
+      border-color: var(--ink);
+    }
+
+    .chip.active {
+      background: var(--ink);
+      color: #fff;
+      border-color: var(--ink);
+    }
+
+    .chip.companion.active {
+      background: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .stk-textarea {
+      width: 100%;
+      min-height: 78px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      font: inherit;
+      font-size: 13px;
+      resize: vertical;
+      background: #fff;
+    }
+
+    .scope-hint {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .scope-section.hidden {
+      display: none;
+    }
+
+    .tag-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      min-height: 22px;
+      padding: 1px 8px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 11px;
+    }
+
+    .tag-pill.primary {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .tag-pill.companion {
+      background: #e4e7ec;
+      color: var(--muted);
+    }
+
+    button {
+      border: 0;
+      border-radius: 6px;
+      padding: 9px 12px;
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--ink);
+      color: #fff;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .14s ease, opacity .14s ease, background .14s ease;
+      font-family: inherit;
+      font-size: 15px;
+    }
+
+    button:hover:not(:disabled) { transform: translateY(-1px); }
+    button:disabled { opacity: .42; cursor: not-allowed; }
+    button.secondary { background: var(--blue); }
+    button.ghost {
+      color: var(--ink);
+      background: #edf2f7;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .metric {
+      min-height: 64px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+    }
+
+    .metric b {
+      display: block;
+      font-size: 24px;
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .status {
+      border-left: 4px solid var(--blue);
+      background: var(--blue-2);
+      padding: 9px 12px;
+      border-radius: 6px;
+      color: #173f67;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .status.error {
+      border-left-color: var(--red);
+      background: var(--red-2);
+      color: var(--red);
+    }
+
+    .status.success {
+      border-left-color: var(--green);
+      background: var(--green-2);
+      color: var(--green);
+    }
+
+    .status.loading {
+      border-left-color: var(--amber);
+      background: var(--amber-2);
+      color: var(--amber);
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      max-height: calc(100vh - 300px);
+      min-height: 430px;
+      background: #fff;
+    }
+
+    .tabs {
+      display: inline-flex;
+      gap: 6px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f4f7fa;
+      margin-bottom: 8px;
+    }
+
+    .tab {
+      min-height: 36px;
+      padding: 8px 12px;
+      color: var(--muted);
+      background: transparent;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .tab.active {
+      color: #fff;
+      background: var(--ink);
+    }
+
+    .tab:disabled {
+      opacity: .7;
+      cursor: pointer;
+    }
+
+    .result-view {
+      display: none;
+    }
+
+    .result-view.active {
+      display: block;
+    }
+
+    .plan-stack {
+      display: grid;
+      gap: 10px;
+      max-height: calc(100vh - 300px);
+      min-height: 430px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .plan-step {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .step-head {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border-bottom: 1px solid rgba(23, 33, 43, .08);
+    }
+
+    .step-no {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      background: var(--ink);
+      color: #fff;
+      font-weight: 900;
+    }
+
+    .step-title {
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .step-title span {
+      display: block;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+    .step-count {
+      color: var(--green);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .step-items {
+      overflow: auto;
+    }
+
+    .step-items table {
+      min-width: 820px;
+      font-size: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+      font-size: 13px;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: var(--ink);
+      color: #fff;
+      text-align: left;
+      padding: 10px;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #e8edf2;
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td { background: #fafbfd; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      min-height: 24px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .pill.zero { background: var(--red-2); color: var(--red); }
+    .pill.one { background: var(--amber-2); color: var(--amber); }
+
+    .empty {
+      display: grid;
+      place-items: center;
+      min-height: 260px;
+      color: var(--muted);
+      text-align: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    @media (max-width: 860px) {
+      header,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .step-head {
+        grid-template-columns: auto 1fr;
+      }
+
+      .step-count {
+        grid-column: 2;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="home-link" href="/">← 回首頁</a>
+  <main class="shell">
+    <header>
+      <div>
+        <h1>門市調撥工具</h1>
+      </div>
+      <div class="stamp">
+        <strong>Store Ops</strong><br>
+        Live · EPB
+      </div>
+    </header>
+
+    <section class="grid">
+      <aside class="panel">
+        <div class="panel-head">
+          <span>本店設定</span>
+          <i data-lucide="warehouse"></i>
+        </div>
+        <div class="panel-body">
+          <div class="source-card">
+            <strong>資料來源：EPB 即時庫存</strong>
+            自動從 140EB STORESUM「存貨彙總」抓取所有門市最新庫存，無需手動匯出 Excel。
+            <div class="data-state">
+              <span id="dataStateText">主機資料背景載入中…</span>
+              <button id="refreshBtn" type="button" class="link-btn" disabled>重新整理庫存</button>
+            </div>
+          </div>
+          <div class="store-picker">
+            <label for="storeSelect">選擇本店門市</label>
+            <select id="storeSelect" disabled>
+              <option value="">載入門市清單中…</option>
+            </select>
+          </div>
+
+          <div class="scope">
+            <div class="scope-title">查詢範圍</div>
+            <div class="mode-toggle" role="radiogroup" aria-label="查詢模式">
+              <input type="radio" name="mode" id="modeCategory" value="category" checked>
+              <label for="modeCategory">主機需求</label>
+              <input type="radio" name="mode" id="modeStkId" value="stk_id">
+              <label for="modeStkId">指定需求</label>
+            </div>
+
+            <div class="scope-section" id="categoryScope">
+              <div class="scope-title">主機類別（可多選）</div>
+              <div class="chip-row" id="primaryCatRow"></div>
+            </div>
+
+            <div class="scope-section hidden" id="stkIdScope">
+              <div class="scope-title">存貨代碼（一行一個或以逗號 / 空白分隔）</div>
+              <textarea id="stkIdInput" class="stk-textarea" placeholder="例：A12345&#10;A12346, A12347"></textarea>
+            </div>
+
+            <div class="scope-section">
+              <div class="scope-title">建議搭配（選填，可多選）</div>
+              <div class="chip-row" id="companionCatRow"></div>
+              <div class="scope-hint">搭配品項套用同條件：本店 ≤ 1、來源 ≥ 3。</div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button id="runBtn" disabled><i data-lucide="play"></i>從 EPB 取得最新庫存並分析</button>
+            <button id="downloadSuggestionBtn" class="secondary" disabled><i data-lucide="download"></i>下載調撥建議清單</button>
+            <button id="downloadPlanBtn" class="ghost" disabled><i data-lucide="list-checks"></i>下載調撥計畫</button>
+          </div>
+        </div>
+      </aside>
+
+      <section class="panel">
+        <div class="panel-head">
+          <span>結果</span>
+          <i data-lucide="bar-chart-3"></i>
+        </div>
+        <div class="panel-body">
+          <div class="metrics">
+            <div class="metric"><b id="candidateCount">0</b><span id="candidateLabel">候選品項</span></div>
+            <div class="metric"><b id="warehouseCount">0</b><span>來源倉數</span></div>
+            <div class="metric"><b id="stepCount">0</b><span>調撥步驟</span></div>
+          </div>
+          <div id="status" class="status">載入門市清單中…</div>
+          <div style="height: 14px"></div>
+          <div class="tabs" aria-label="結果切換">
+            <button id="planTab" class="tab active" type="button">調撥計畫</button>
+            <button id="suggestionTab" class="tab" type="button">建議清單</button>
+          </div>
+          <div id="planView" class="result-view active">
+            <div id="planPreview" class="empty">尚無資料</div>
+          </div>
+          <div id="suggestionView" class="result-view">
+            <div id="suggestionPreview" class="empty">尚無資料</div>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    // 主機類別預設（與 server.py 的 TRANSFER_CAT4_PRESETS 同步）；
+    // 若後端有回 cat4Presets 就以後端為準，沒有時 fallback 用這份。
+    const DEFAULT_CAT4_PRESETS = {
+      "CPU":    ["4001", "4002"],
+      "iPhone": ["4004"],
+      "iPad":   ["4005", "4006", "4041"],
+      "Watch":  ["4038"],
+    };
+
+    const state = {
+      storeMap: {},          // {warehouseName: storeId}
+      stores: [],            // [{storeId, name}]
+      selectedStore: "",     // warehouse name
+      mode: "category",      // "category" | "stk_id"
+      cat4Presets: { ...DEFAULT_CAT4_PRESETS },  // {label: [codes...]}
+      primaryCategories: new Set(),    // category labels (e.g. "iPhone")
+      companionCategories: new Set(),  // category labels
+      dataReady: false,      // 主機資料快取是否就緒
+      dataTime: "",          // 快取資料時間（HH:MM）
+      rows: [],
+      plan: [],
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const storeSelect = $("storeSelect");
+    const runBtn = $("runBtn");
+    const downloadSuggestionBtn = $("downloadSuggestionBtn");
+    const downloadPlanBtn = $("downloadPlanBtn");
+    const stkIdInput = $("stkIdInput");
+    const refreshBtn = $("refreshBtn");
+
+    function fmtTime(iso) {
+      if (!iso) return "";
+      const d = new Date(iso);
+      if (isNaN(d)) return "";
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mm = String(d.getMinutes()).padStart(2, "0");
+      return `${hh}:${mm}`;
+    }
+
+    function setDataState(text, kind) {
+      $("dataStateText").textContent = text;
+      const el = document.querySelector(".data-state");
+      if (el) el.className = `data-state ${kind || ""}`.trim();
+    }
+
+    function parseStkIds(raw) {
+      if (!raw) return [];
+      const tokens = raw
+        .replace(/，/g, ",")
+        .split(/[\s,;\n\r\t]+/)
+        .map(s => s.trim())
+        .filter(Boolean);
+      const seen = new Set();
+      const out = [];
+      for (const t of tokens) {
+        const code = t.toUpperCase();
+        if (!seen.has(code)) {
+          seen.add(code);
+          out.push(code);
+        }
+      }
+      return out;
+    }
+
+    function expandCat4(labels) {
+      const codes = [];
+      labels.forEach(label => {
+        (state.cat4Presets[label] || []).forEach(code => codes.push(code));
+      });
+      return [...new Set(codes)];
+    }
+
+    function escapeHtml(value) {
+      if (value === null || value === undefined) return "";
+      return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      })[char]);
+    }
+
+    function setStatus(message, type = "") {
+      const el = $("status");
+      el.className = `status ${type}`.trim();
+      el.textContent = message;
+    }
+
+    function setMetric(id, value) {
+      $(id).textContent = String(value);
+    }
+
+    function selectedStoreName() {
+      return state.selectedStore || "本店";
+    }
+
+    function switchView(view) {
+      const isPlan = view === "plan";
+      $("planTab").classList.toggle("active", isPlan);
+      $("suggestionTab").classList.toggle("active", !isPlan);
+      $("planView").classList.toggle("active", isPlan);
+      $("suggestionView").classList.toggle("active", !isPlan);
+    }
+
+    function tagPill(tag) {
+      const isCompanion = tag === "companion";
+      const label = isCompanion ? "搭" : "主";
+      const cls = isCompanion ? "companion" : "primary";
+      return `<span class="tag-pill ${cls}">${label}</span>`;
+    }
+
+    function renderSuggestionPreview(rows) {
+      if (!rows.length) {
+        $("suggestionPreview").className = "empty";
+        $("suggestionPreview").innerHTML = "沒有符合條件的品項";
+        return;
+      }
+
+      $("suggestionPreview").className = "table-wrap";
+      $("suggestionPreview").innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>標籤</th>
+              <th>存貨代碼</th>
+              <th>型號</th>
+              <th>存貨名稱</th>
+              <th>${escapeHtml(selectedStoreName())}</th>
+              <th>建議來源</th>
+              <th>來源庫存</th>
+              <th>其他庫存≥3的倉庫</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(row => `
+              <tr>
+                <td>${tagPill(row.tag)}</td>
+                <td>${escapeHtml(row.code)}</td>
+                <td>${escapeHtml(row.model)}</td>
+                <td>${escapeHtml(row.name)}</td>
+                <td><span class="pill ${row.targetQty === 0 ? "zero" : "one"}">${row.targetQty}</span></td>
+                <td>${escapeHtml(row.source)}</td>
+                <td>${row.sourceQty}</td>
+                <td>${escapeHtml(row.otherStock)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    const STEP_FILLS = ["EAF3FF", "EAF7EA", "FFF4DA", "FCEBF3", "ECEBFF", "E8F6F7", "F4F1EA", "F0F6E8"];
+
+    function renderPlanPreview(plan) {
+      if (!plan.length) {
+        $("planPreview").className = "empty";
+        $("planPreview").innerHTML = "沒有可執行的調撥步驟";
+        return;
+      }
+
+      $("planPreview").className = "plan-stack";
+      $("planPreview").innerHTML = plan.map(block => {
+        const uniqueModels = [...new Set(block.items.map(row => row.model).filter(Boolean))];
+        const models = uniqueModels.slice(0, 8).join("、");
+        const hiddenCount = Math.max(0, uniqueModels.length - 8);
+        const color = STEP_FILLS[(block.step - 1) % STEP_FILLS.length];
+        const pCount = block.primaryCount ?? block.items.filter(r => r.tag !== "companion").length;
+        const cCount = block.companionCount ?? (block.items.length - pCount);
+        const ratio = cCount > 0 ? `主 ${pCount} · 搭 ${cCount}` : `${block.items.length} 項`;
+        return `
+          <section class="plan-step" style="background:#${color}">
+            <div class="step-head">
+              <div class="step-no">${block.step}</div>
+              <div class="step-title">
+                ${escapeHtml(block.source)}
+                <span>${escapeHtml(models)}${hiddenCount ? ` 等 ${hiddenCount + 8} 個型號` : ""}</span>
+              </div>
+              <div class="step-count">${ratio}</div>
+            </div>
+            <div class="step-items">
+              <table>
+                <thead>
+                  <tr>
+                    <th>標籤</th>
+                    <th>存貨代碼</th>
+                    <th>型號</th>
+                    <th>存貨名稱</th>
+                    <th>${escapeHtml(selectedStoreName())}</th>
+                    <th>來源庫存</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${block.items.map(row => `
+                    <tr>
+                      <td>${tagPill(row.tag)}</td>
+                      <td>${escapeHtml(row.code)}</td>
+                      <td>${escapeHtml(row.model)}</td>
+                      <td>${escapeHtml(row.name)}</td>
+                      <td><span class="pill ${row.targetQty === 0 ? "zero" : "one"}">${row.targetQty}</span></td>
+                      <td>${row.sourceQty}</td>
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        `;
+      }).join("");
+    }
+
+    function renderResults() {
+      renderPlanPreview(state.plan);
+      renderSuggestionPreview(state.rows);
+      switchView("plan");
+    }
+
+    function populateStorePicker(items, defaultStoreId) {
+      state.stores = items;
+      state.storeMap = Object.fromEntries(items.map(s => [s.name, s.storeId]));
+      const defaultEntry = items.find(s => s.storeId === defaultStoreId);
+      const selectedName = state.selectedStore && state.storeMap[state.selectedStore]
+        ? state.selectedStore
+        : (defaultEntry ? defaultEntry.name : "");
+      state.selectedStore = selectedName;
+      storeSelect.innerHTML = [
+        '<option value="">請選擇本店門市</option>',
+        ...items.map(s => (
+          `<option value="${escapeHtml(s.name)}"${s.name === selectedName ? " selected" : ""}>${escapeHtml(s.name)}</option>`
+        ))
+      ].join("");
+      storeSelect.disabled = !items.length;
+      updateRunButton();
+    }
+
+    function renderChipRow(containerId, selectedSet, kind) {
+      const container = $(containerId);
+      const labels = Object.keys(state.cat4Presets);
+      if (!labels.length) {
+        container.innerHTML = '<span class="scope-hint">尚未載入主機類別</span>';
+        return;
+      }
+      container.innerHTML = labels.map(label => {
+        const codes = (state.cat4Presets[label] || []).join("/");
+        const active = selectedSet.has(label) ? " active" : "";
+        const extra = kind === "companion" ? " companion" : "";
+        return `<button type="button" class="chip${extra}${active}" data-label="${escapeHtml(label)}" title="cat4 ${codes}">${escapeHtml(label)}</button>`;
+      }).join("");
+      container.querySelectorAll(".chip").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const label = btn.dataset.label;
+          if (selectedSet.has(label)) selectedSet.delete(label);
+          else selectedSet.add(label);
+          btn.classList.toggle("active");
+          updateRunButton();
+        });
+      });
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      $("modeCategory").checked = mode === "category";
+      $("modeStkId").checked = mode === "stk_id";
+      $("categoryScope").classList.toggle("hidden", mode !== "category");
+      $("stkIdScope").classList.toggle("hidden", mode !== "stk_id");
+      updateRunButton();
+    }
+
+    function updateRunButton() {
+      const hasStore = !!state.selectedStore;
+      let hasScope = false;
+      if (state.mode === "category") {
+        hasScope = state.primaryCategories.size > 0;
+      } else {
+        hasScope = parseStkIds(stkIdInput.value).length > 0;
+      }
+      runBtn.disabled = !(hasStore && hasScope);
+    }
+
+    function decodeFilenameFromHeader(header) {
+      if (!header) return null;
+      const utfMatch = header.match(/filename\*=UTF-8''([^;]+)/i);
+      if (utfMatch) {
+        try { return decodeURIComponent(utfMatch[1]); } catch { /* fall through */ }
+      }
+      const plain = header.match(/filename="?([^";]+)"?/i);
+      return plain ? plain[1] : null;
+    }
+
+    function triggerBlobDownload(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename || "download.xlsx";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    async function loadStores() {
+      setStatus("載入門市清單中…", "loading");
+      // 先用內建預設渲染按鈕，後端有更新再覆蓋
+      renderChipRow("primaryCatRow", state.primaryCategories, "primary");
+      renderChipRow("companionCatRow", state.companionCategories, "companion");
+      try {
+        const res = await fetch("/api/transfer/stores");
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "無法取得門市清單");
+        if (data.cat4Presets && Object.keys(data.cat4Presets).length) {
+          state.cat4Presets = data.cat4Presets;
+          renderChipRow("primaryCatRow", state.primaryCategories, "primary");
+          renderChipRow("companionCatRow", state.companionCategories, "companion");
+        }
+        populateStorePicker(data.items || [], data.defaultStore);
+        if (state.selectedStore) {
+          setStatus(`已預選本店門市：${state.selectedStore}，請選擇主機類別或輸入存貨代碼後執行分析`);
+        } else if ((data.items || []).length) {
+          setStatus(`已讀取 ${data.items.length} 個門市倉，請選擇本店門市`);
+        } else {
+          setStatus("尚未取得任何門市倉，請確認 VPN 連線", "error");
+        }
+        // 門市載好後，背景預載主機資料（不卡 UI）
+        prewarm(false);
+      } catch (error) {
+        console.error(error);
+        storeSelect.innerHTML = '<option value="">載入失敗，請重新整理</option>';
+        storeSelect.disabled = true;
+        setStatus(error.message || "載入門市清單失敗", "error");
+      }
+    }
+
+    let prewarmTimer = null;
+    let prewarmInFlight = false;
+    async function prewarm(refresh) {
+      if (prewarmInFlight) return;
+      prewarmInFlight = true;
+      state.dataReady = false;
+      refreshBtn.disabled = true;
+      const t0 = Date.now();
+      if (prewarmTimer) clearInterval(prewarmTimer);
+      const tick = () => {
+        const sec = Math.round((Date.now() - t0) / 1000);
+        setDataState(`主機資料${refresh ? "更新" : "載入"}中…（${sec} 秒）`, "loading");
+      };
+      tick();
+      prewarmTimer = setInterval(tick, 1000);
+      try {
+        const res = await fetch("/api/transfer/prewarm", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refresh: !!refresh }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "預載失敗");
+        state.dataReady = true;
+        state.dataTime = fmtTime(data.dataTime);
+        setDataState(`資料已就緒（${state.dataTime}）`, "ready");
+      } catch (error) {
+        console.error(error);
+        const reason = (error && error.message ? String(error.message) : "").slice(0, 60);
+        setDataState(reason ? `背景載入失敗：${reason}（可按重新整理重試）` : "背景載入失敗，可按重新整理重試", "error");
+      } finally {
+        if (prewarmTimer) { clearInterval(prewarmTimer); prewarmTimer = null; }
+        prewarmInFlight = false;
+        refreshBtn.disabled = false;
+      }
+    }
+
+    function collectPayload() {
+      const storeId = state.storeMap[state.selectedStore];
+      const payload = {
+        storeId,
+        mode: state.mode,
+        companionCategories: expandCat4(state.companionCategories),
+      };
+      if (state.mode === "category") {
+        payload.primaryCategories = expandCat4(state.primaryCategories);
+      } else {
+        payload.stkIds = parseStkIds(stkIdInput.value);
+      }
+      return payload;
+    }
+
+    function describeScope() {
+      const parts = [];
+      if (state.mode === "category") {
+        parts.push(`主機需求：${[...state.primaryCategories].join("/")}`);
+      } else {
+        const ids = parseStkIds(stkIdInput.value);
+        parts.push(`指定需求：${ids.length} 個存貨代碼`);
+      }
+      if (state.companionCategories.size) {
+        parts.push(`搭配：${[...state.companionCategories].join("/")}`);
+      }
+      return parts.join("、");
+    }
+
+    function resetResultsUI() {
+      state.rows = [];
+      state.plan = [];
+      setMetric("candidateCount", 0);
+      setMetric("warehouseCount", 0);
+      setMetric("stepCount", 0);
+      $("candidateLabel").textContent = "候選品項";
+      downloadSuggestionBtn.disabled = true;
+      downloadPlanBtn.disabled = true;
+      renderResults();
+    }
+
+    let elapsedTimer = null;
+    function startElapsed(prefix) {
+      stopElapsed();
+      const t0 = Date.now();
+      const tick = () => {
+        const sec = Math.round((Date.now() - t0) / 1000);
+        setStatus(`${prefix}（已等待 ${sec} 秒，全門市約需 20 秒）`, "loading");
+      };
+      tick();
+      elapsedTimer = setInterval(tick, 1000);
+    }
+    function stopElapsed() {
+      if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null; }
+    }
+
+    async function runAnalysis() {
+      if (!state.storeMap[state.selectedStore]) return;
+      const payload = collectPayload();
+      runBtn.disabled = true;
+      downloadSuggestionBtn.disabled = true;
+      downloadPlanBtn.disabled = true;
+      startElapsed(`從 EPB 取得庫存中…（${describeScope()}）`);
+
+      try {
+        const res = await fetch("/api/transfer/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        stopElapsed();
+        if (!res.ok) throw new Error(data.error || "分析失敗");
+
+        state.rows = data.items || [];
+        state.plan = data.plan || [];
+        setMetric("candidateCount", data.rowCount ?? state.rows.length);
+        setMetric("warehouseCount", data.warehouseCount ?? 0);
+        setMetric("stepCount", data.stepCount ?? state.plan.length);
+        const pCount = data.primaryCount ?? state.rows.length;
+        const cCount = data.companionCount ?? 0;
+        $("candidateLabel").textContent = cCount > 0 ? `候選品項（主 ${pCount} · 搭 ${cCount}）` : "候選品項";
+        renderResults();
+        const tail = cCount > 0 ? `（主 ${pCount} · 搭 ${cCount}）` : "";
+        const dt = fmtTime(data.dataTime);
+        if (dt) {
+          state.dataTime = dt;
+          if (data.mode === "category") {
+            state.dataReady = true;
+            setDataState(`資料已就緒（${dt}）`, "ready");
+          }
+        }
+        const dtTail = dt ? `｜資料時間 ${dt}` : "";
+        setStatus(`完成：${state.selectedStore} 有 ${state.rows.length} 個候選品項${tail}，${state.plan.length} 個調撥步驟${dtTail}`, "success");
+        downloadSuggestionBtn.disabled = state.rows.length === 0;
+        downloadPlanBtn.disabled = state.plan.length === 0;
+      } catch (error) {
+        console.error(error);
+        stopElapsed();
+        resetResultsUI();
+        setStatus(error.message || "分析失敗", "error");
+      } finally {
+        stopElapsed();
+        updateRunButton();
+      }
+    }
+
+    async function downloadXlsx(endpoint, fallbackName) {
+      if (!state.storeMap[state.selectedStore]) return;
+      const payload = collectPayload();
+      try {
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          let message = "下載失敗";
+          try { message = (await res.json()).error || message; } catch { /* ignore */ }
+          throw new Error(message);
+        }
+        const blob = await res.blob();
+        const filename = decodeFilenameFromHeader(res.headers.get("Content-Disposition")) || fallbackName;
+        triggerBlobDownload(blob, filename);
+      } catch (error) {
+        console.error(error);
+        setStatus(error.message || "下載失敗", "error");
+      }
+    }
+
+    function downloadSuggestion() {
+      return downloadXlsx("/api/transfer/suggestion/export", `${selectedStoreName()}調撥建議清單.xlsx`);
+    }
+
+    function downloadPlan() {
+      return downloadXlsx("/api/transfer/plan/export", `${selectedStoreName()}調撥計畫.xlsx`);
+    }
+
+    storeSelect.addEventListener("change", () => {
+      state.selectedStore = storeSelect.value;
+      resetResultsUI();
+      updateRunButton();
+      setStatus(state.selectedStore
+        ? `已選擇本店門市：${state.selectedStore}，請設定查詢範圍後執行分析`
+        : "請選擇本店門市");
+    });
+
+    document.querySelectorAll('input[name="mode"]').forEach(input => {
+      input.addEventListener("change", () => {
+        setMode(input.value);
+        resetResultsUI();
+        setStatus(state.mode === "category"
+          ? "請選擇主機類別（可多選）"
+          : "請輸入存貨代碼（一行一個或以逗號 / 空白分隔）");
+      });
+    });
+
+    stkIdInput.addEventListener("input", () => {
+      resetResultsUI();
+      updateRunButton();
+    });
+
+    runBtn.addEventListener("click", runAnalysis);
+    downloadSuggestionBtn.addEventListener("click", downloadSuggestion);
+    downloadPlanBtn.addEventListener("click", downloadPlan);
+    refreshBtn.addEventListener("click", () => prewarm(true));
+    $("planTab").addEventListener("click", () => switchView("plan"));
+    $("suggestionTab").addEventListener("click", () => switchView("suggestion"));
+
+    if (window.lucide) lucide.createIcons();
+    setMode("category");
+    loadStores();
+  </script>
+</body>
+</html>
