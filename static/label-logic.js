@@ -137,7 +137,12 @@ function parseWatch(partCode, name) {
   const color = colorMatch ? colorMatch[1] : '';
   const bandMatch = name.match(/-\s*([A-Z]\/[A-Z]|[A-Z]{1,2})$/);
   const band = bandMatch ? bandMatch[1] : '';
-  return { product, right1: sku, color: band, right2: color, type: 'watch' };
+  // 連線版要印在標籤上（價格與功能都不同）。GPS 是基本款，不標。
+  // cellular 只是旗標，實際接到錶殼色後面是在 applyLabelOverrides 做的——
+  // 這樣 fields 的整值覆寫（例如「深古銅色 → 古銅」）才對得到。
+  const cellular = /Apple Watch \S+\s+CEL\b/i.test(name);
+  // 四格與 iPhone 對齊：左上 SKU、右上 型號尺寸、左下 錶殼色、右下 錶帶尺寸
+  return { product, right1: band, color, right2: sku, type: 'watch', cellular };
 }
 
 function parseiPad(partCode, name) {
@@ -219,6 +224,9 @@ function applyLabelOverrides(parsed) {
     const current = parsed[key];
     if (current && fields[current]) parsed[key] = fields[current];
   }
+  // CEL 在覆寫之後才接上：否則 color 變成「深古銅色 CEL」，
+  // fields 設的「深古銅色 → 古銅」就整值比對不到了。
+  if (parsed.cellular) parsed.color = parsed.color ? `${parsed.color} CEL` : 'CEL';
   return parsed;
 }
 

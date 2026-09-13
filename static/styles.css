@@ -749,7 +749,10 @@ input[type="date"] {
   padding-top: var(--label-content-top, 2mm);
 }
 .label-cell.has-border { border: 0.3px solid #aaa; }
-.label-line { display: flex; justify-content: space-between; align-items: baseline; height: 50%; line-height: 1; }
+/* gap：內容塞不下時 space-between 會把左右兩欄推到貼在一起，
+   例如「深古銅色 CEL」配「S/M」會連成 CES/M 而誤讀。留最小間隔，
+   寧可讓左欄被裁掉幾個字（它有 overflow:hidden），也不要黏死。 */
+.label-line { display: flex; justify-content: space-between; align-items: baseline; height: 50%; line-height: 1; gap: 1.5mm; }
 .label-line.primary { padding-top: var(--label-first-top, 2mm); }
 .label-line.primary .label-left,
 .label-line.primary .label-right { font-size: var(--label-first-font, 10pt); }
@@ -784,6 +787,7 @@ input[type="date"] {
   padding-left: var(--label-left-pad, 5mm);
   white-space: nowrap;
   overflow: hidden;
+  min-width: 0;          /* 沒有這行 flex 不會壓縮它，gap 就擠不出來 */
   color: #000;
   text-transform: uppercase;
 }
