@@ -45,6 +45,7 @@
           <h2>查詢結果</h2>
           <div class="result-heading-right">
             <span id="resultCount">0 筆</span>
+            <button id="settingsBtn" class="ghost-btn" type="button">名稱設定</button>
             <button id="labelBtn" class="ghost-btn" type="button" disabled>產生標籤</button>
           </div>
         </div>
@@ -68,6 +69,55 @@
           </table>
         </div>
       </section>
+    </section>
+
+    <section id="settingsPanel" class="settings-panel hidden">
+      <div class="settings-head">
+        <div class="settings-title">
+          <h2>名稱設定</h2>
+          <span id="settingsHint" class="settings-hint"></span>
+        </div>
+        <div class="settings-actions">
+          <button id="settingsExportBtn" class="ghost-btn" type="button">匯出 JSON</button>
+          <button id="settingsSaveBtn" class="primary-btn" type="button">儲存</button>
+          <button id="settingsCloseBtn" class="ghost-btn" type="button">關閉</button>
+        </div>
+      </div>
+
+      <div id="settingsMissing" class="settings-missing hidden">
+        <h3>本次查詢有還沒中文化的顏色</h3>
+        <p class="settings-note">填好中文後按「加入」，會寫進對應的顏色表；接著按右上角「儲存」才會存檔。</p>
+        <div id="settingsMissingList" class="settings-missing-list"></div>
+      </div>
+
+      <div class="settings-tabs" id="settingsTabs">
+        <button class="settings-tab is-active" type="button" data-table="iphoneColors">iPhone 顏色</button>
+        <button class="settings-tab" type="button" data-table="enColors">iPad／Mac 顏色</button>
+        <button class="settings-tab" type="button" data-table="products">品名</button>
+        <button class="settings-tab" type="button" data-table="fields">其他欄位</button>
+      </div>
+
+      <p id="settingsTableNote" class="settings-note"></p>
+
+      <div class="settings-table-wrap">
+        <table class="settings-table">
+          <thead>
+            <tr>
+              <th class="settings-col-key">來源字串</th>
+              <th class="settings-col-val">標籤上要顯示</th>
+              <th class="settings-col-act"></th>
+            </tr>
+          </thead>
+          <tbody id="settingsBody"></tbody>
+        </table>
+      </div>
+
+      <div class="settings-add">
+        <input id="settingsNewKey" type="text" placeholder="來源字串" autocomplete="off">
+        <span class="settings-arrow">→</span>
+        <input id="settingsNewValue" type="text" placeholder="顯示文字" autocomplete="off">
+        <button id="settingsAddBtn" class="ghost-btn" type="button">新增</button>
+      </div>
     </section>
 
     <section id="labelPanel" class="label-panel hidden">

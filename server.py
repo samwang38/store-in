@@ -18,6 +18,8 @@ from openpyxl.styles import Alignment, Font, PatternFill
 
 ROOT = Path(__file__).resolve().parent
 STATIC_ROOT = ROOT / "static"
+SETTINGS_DIR = ROOT / "settings"
+SETTINGS_FILE = SETTINGS_DIR / "label-overrides.json"
 
 JAVA = "/Library/Java/JavaVirtualMachines/jdk1.8.0_251.jdk/Contents/Home/jre/bin/java"
 JAVAC = "/Library/Java/JavaVirtualMachines/jdk1.8.0_251.jdk/Contents/Home/bin/javac"
@@ -888,6 +890,67 @@ def export_transfer_plan(payload):
     return filename, stream.getvalue()
 
 
+# ─── 標籤名稱設定（本機覆寫檔）──────────────────────────────
+# 兩層設計：內建預設表寫在 static/label-logic.js（進 git、全門市一致），
+# 本檔只存「各門市自己的微調」，不入版控。檔案不存在或壞掉一律回空設定，
+# 前端就退回內建預設，不會影響標籤功能。
+
+SETTINGS_EMPTY = {
+    "version": 1,
+    "updatedAt": "",
+    "iphoneColors": {},   # iPhone 英文色名 → 中文
+    "enColors": {},       # iPad / Mac 英文色名或 3 字母縮寫 → 中文
+    "products": {},       # 解析後品名整值覆寫，例如 Duo → iPhone Duo
+    "fields": {},         # 其他輸出欄位整值覆寫（錶殼色、錶帶尺寸等）
+}
+SETTINGS_TABLES = ("iphoneColors", "enColors", "products", "fields")
+SETTINGS_MAX_ENTRIES = 2000
+SETTINGS_MAX_LEN = 80
+
+
+def load_settings():
+    """讀本機設定檔。任何異常都回空設定，讓前端退回內建預設。"""
+    try:
+        raw = json.loads(SETTINGS_FILE.read_text(encoding="utf-8"))
+    except (FileNotFoundError, ValueError, OSError):
+        return dict(SETTINGS_EMPTY)
+    return normalize_settings(raw)
+
+
+def normalize_settings(raw):
+    """只收白名單欄位，值一律轉字串並去頭尾空白；空 key/空值直接丟掉。"""
+    if not isinstance(raw, dict):
+        return dict(SETTINGS_EMPTY)
+    out = dict(SETTINGS_EMPTY)
+    out["updatedAt"] = text(raw.get("updatedAt"))[:40]
+    for table in SETTINGS_TABLES:
+        src = raw.get(table)
+        if not isinstance(src, dict):
+            continue
+        clean = {}
+        for key, value in src.items():
+            k = text(key).strip()[:SETTINGS_MAX_LEN]
+            v = text(value).strip()[:SETTINGS_MAX_LEN]
+            if not k or not v:
+                continue
+            clean[k] = v
+            if len(clean) >= SETTINGS_MAX_ENTRIES:
+                break
+        out[table] = clean
+    return out
+
+
+def save_settings(payload):
+    """原子寫入：先寫 .tmp 再 rename，避免中途斷電留下半個壞檔。"""
+    data = normalize_settings(payload)
+    data["updatedAt"] = datetime.now().isoformat(timespec="seconds")
+    SETTINGS_DIR.mkdir(parents=True, exist_ok=True)
+    tmp = SETTINGS_FILE.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    tmp.replace(SETTINGS_FILE)
+    return data
+
+
 class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(STATIC_ROOT), **kwargs)
@@ -927,6 +990,9 @@ class Handler(SimpleHTTPRequestHandler):
             if parsed.path == "/api/transfer/stores":
                 self.send_json(200, list_transfer_stores())
                 return
+            if parsed.path == "/api/settings":
+                self.send_json(200, {"ok": True, "settings": load_settings()})
+                return
         except Exception as exc:
             self.send_json(500, {"ok": False, "error": str(exc)})
             return
@@ -936,6 +1002,9 @@ class Handler(SimpleHTTPRequestHandler):
         parsed = urllib.parse.urlparse(self.path)
         try:
             payload = self.read_payload()
+            if parsed.path == "/api/settings":
+                self.send_json(200, {"ok": True, "settings": save_settings(payload.get("settings"))})
+                return
             if parsed.path == "/api/purchase":
                 self.send_json(200, query_purchase(payload))
                 return

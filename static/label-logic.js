@@ -1,6 +1,29 @@
 // label-logic.js
 // 標籤解析邏輯 — 移植自 samfor-work.github.io/work/label.html
 // 請勿自行修改解析邏輯；如需更新請對照原始 label.html 同步。
+//
+// 下面的 LABEL_OVERRIDES 是「設定模式」的覆寫層，疊在解析結果之上，
+// 不算解析邏輯的一部分：內建對照表（進 git、全門市一致）永遠是底，
+// 覆寫層為空時行為與沒有設定模式時完全相同。
+
+// 由設定模式載入；每張表都是 { 來源字串: 顯示字串 }。
+// iphoneColors / enColors 在「解析當中」補英文色名的中文；
+// products / fields 在「解析之後」對輸出欄位做整值取代。
+let LABEL_OVERRIDES = { iphoneColors: {}, enColors: {}, products: {}, fields: {} };
+
+function setLabelOverrides(source) {
+  const pick = (key) => (source && typeof source[key] === 'object' && source[key]) || {};
+  LABEL_OVERRIDES = {
+    iphoneColors: pick('iphoneColors'),
+    enColors: pick('enColors'),
+    products: pick('products'),
+    fields: pick('fields'),
+  };
+}
+
+function getLabelOverrides() {
+  return LABEL_OVERRIDES;
+}
 
 const COLOR_MAP = {
   'MDN':'午夜色','SKY':'星光色','STL':'銀色','SL':'銀色','SB':'太空黑',
@@ -57,17 +80,21 @@ const IPHONE_COLOR_MAP = {
 
 function enColorToChinese(colorStr) {
   const upper = colorStr.toUpperCase().replace(/-TWN$/i, '').trim();
+  const ov = LABEL_OVERRIDES.enColors;
+  if (ov[upper]) return ov[upper];
   if (EN_COLOR_MAP[upper]) return EN_COLOR_MAP[upper];
   const firstWord = upper.split(' ')[0];
   // 補充：3 字母縮寫（如 STL/BLU/SPG）也查 COLOR_MAP
-  return EN_COLOR_MAP[firstWord] || COLOR_MAP[upper] || COLOR_MAP[firstWord] || colorStr;
+  return ov[firstWord] || EN_COLOR_MAP[firstWord] || COLOR_MAP[upper] || COLOR_MAP[firstWord] || colorStr;
 }
 
 function iphoneColorToChinese(colorStr) {
   const upper = colorStr.toUpperCase().trim();
+  const ov = LABEL_OVERRIDES.iphoneColors;
+  if (ov[upper]) return ov[upper];
   if (IPHONE_COLOR_MAP[upper]) return IPHONE_COLOR_MAP[upper];
   const firstWord = upper.split(' ')[0];
-  return IPHONE_COLOR_MAP[firstWord] || colorStr;
+  return ov[firstWord] || IPHONE_COLOR_MAP[firstWord] || colorStr;
 }
 
 function parseiPhone(partCode, name) {
@@ -140,7 +167,7 @@ function parseiPad(partCode, name) {
     }
   }
   const sku = partCode.substring(2, 5);
-  return { product, right1: storage, color, right2: sku, type: 'ipad' };
+  return { product, right1: storage, color, right2: sku, type: 'ipad', keepEnglish: !!isPro };
 }
 
 function parseMac(partCode, name) {
@@ -159,7 +186,7 @@ function parseMac(partCode, name) {
   return { product, right1: storage, color, right2: sku, type: 'mac' };
 }
 
-function parseProduct(fullName) {
+function parseProductRaw(fullName) {
   const parts = fullName.trim().split(' ');
   const partCode = parts[0];
   const name = parts.slice(1).join(' ');
@@ -167,6 +194,41 @@ function parseProduct(fullName) {
   if (/^iPhone/i.test(name))     return parseiPhone(partCode, name);
   if (/^iPad/i.test(name))       return parseiPad(partCode, name);
   return parseMac(partCode, name);
+}
+
+// 解析後的整值取代：品名走 products，其餘顯示欄位走 fields。
+function applyLabelOverrides(parsed) {
+  const { products, fields } = LABEL_OVERRIDES;
+  if (products[parsed.product]) parsed.product = products[parsed.product];
+  for (const key of ['color', 'right1', 'right2']) {
+    const current = parsed[key];
+    if (current && fields[current]) parsed[key] = fields[current];
+  }
+  return parsed;
+}
+
+function parseProduct(fullName) {
+  return applyLabelOverrides(parseProductRaw(fullName));
+}
+
+// 掃出本次查詢裡「還沒中文化」的顏色，供設定模式一鍵補字。
+// 只看 iPhone / iPad / Mac：Watch 的錶殼色本來就是中文，
+// iPad Pro 則是刻意保留英文（keepEnglish），兩者都不算漏。
+function findUntranslatedColors(items) {
+  const found = new Map();
+  for (const item of items || []) {
+    const name = String(item.name || '').trim();
+    if (!name) continue;
+    const parsed = parseProductRaw(name);
+    if (parsed.type === 'watch' || parsed.keepEnglish) continue;
+    const color = String(parsed.color || '').trim();
+    if (!color || !/[A-Za-z]/.test(color)) continue;
+    const table = parsed.type === 'iphone' ? 'iphoneColors' : 'enColors';
+    const key = table + '|' + color.toUpperCase();
+    if (found.has(key)) continue;
+    found.set(key, { color, key: color.toUpperCase(), table, sample: name });
+  }
+  return [...found.values()];
 }
 
 function getISOWeek(date) {
