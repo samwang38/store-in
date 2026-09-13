@@ -11,6 +11,13 @@
 // products / fields 在「解析之後」對輸出欄位做整值取代。
 let LABEL_OVERRIDES = { iphoneColors: {}, enColors: {}, products: {}, fields: {} };
 
+// 覆寫層的值是空字串＝「停用這筆內建對照」，與「沒有這筆設定」不同：
+// 前者會略過內建值、印回原字，後者才往下查內建表。所以一律用 hasOwnProperty 判斷，
+// 不能用真假值，否則空字串會被當成沒設定。
+function hasOverride(map, key) {
+  return Object.prototype.hasOwnProperty.call(map, key);
+}
+
 function setLabelOverrides(source) {
   const pick = (key) => (source && typeof source[key] === 'object' && source[key]) || {};
   LABEL_OVERRIDES = {
@@ -81,20 +88,22 @@ const IPHONE_COLOR_MAP = {
 function enColorToChinese(colorStr) {
   const upper = colorStr.toUpperCase().replace(/-TWN$/i, '').trim();
   const ov = LABEL_OVERRIDES.enColors;
-  if (ov[upper]) return ov[upper];
+  if (hasOverride(ov, upper)) return ov[upper] || colorStr;
   if (EN_COLOR_MAP[upper]) return EN_COLOR_MAP[upper];
   const firstWord = upper.split(' ')[0];
+  if (hasOverride(ov, firstWord)) return ov[firstWord] || colorStr;
   // 補充：3 字母縮寫（如 STL/BLU/SPG）也查 COLOR_MAP
-  return ov[firstWord] || EN_COLOR_MAP[firstWord] || COLOR_MAP[upper] || COLOR_MAP[firstWord] || colorStr;
+  return EN_COLOR_MAP[firstWord] || COLOR_MAP[upper] || COLOR_MAP[firstWord] || colorStr;
 }
 
 function iphoneColorToChinese(colorStr) {
   const upper = colorStr.toUpperCase().trim();
   const ov = LABEL_OVERRIDES.iphoneColors;
-  if (ov[upper]) return ov[upper];
+  if (hasOverride(ov, upper)) return ov[upper] || colorStr;
   if (IPHONE_COLOR_MAP[upper]) return IPHONE_COLOR_MAP[upper];
   const firstWord = upper.split(' ')[0];
-  return ov[firstWord] || IPHONE_COLOR_MAP[firstWord] || colorStr;
+  if (hasOverride(ov, firstWord)) return ov[firstWord] || colorStr;
+  return IPHONE_COLOR_MAP[firstWord] || colorStr;
 }
 
 function parseiPhone(partCode, name) {
@@ -146,8 +155,10 @@ function parseiPad(partCode, name) {
   let color = '';
   for (const p of name.split('/')) {
     const key = p.trim();
-    if (COLOR_MAP[key]) {
-      color = isPro ? key : COLOR_MAP[key];
+    // 覆寫層要優先於內建表，而且管理員新增的縮寫也要認得出來：
+    // iPad 常見的 `128GB/SPG` 格式若只查 COLOR_MAP，設定功能對它完全無效。
+    if (hasOverride(LABEL_OVERRIDES.enColors, key.toUpperCase()) || COLOR_MAP[key]) {
+      color = isPro ? key : enColorToChinese(key);
       break;
     }
   }
@@ -180,7 +191,10 @@ function parseMac(partCode, name) {
   let color = '';
   for (const p of restParts) {
     const key = p.trim();
-    if (COLOR_MAP[key]) { color = COLOR_MAP[key]; break; }
+    if (hasOverride(LABEL_OVERRIDES.enColors, key.toUpperCase()) || COLOR_MAP[key]) {
+      color = enColorToChinese(key);
+      break;
+    }
   }
   const sku = partCode.substring(2, 5);
   return { product, right1: storage, color, right2: sku, type: 'mac' };
@@ -199,6 +213,7 @@ function parseProductRaw(fullName) {
 // 解析後的整值取代：品名走 products，其餘顯示欄位走 fields。
 function applyLabelOverrides(parsed) {
   const { products, fields } = LABEL_OVERRIDES;
+  // 空字串（停用）在這裡等於「不覆寫」，維持解析出來的原值。
   if (products[parsed.product]) parsed.product = products[parsed.product];
   for (const key of ['color', 'right1', 'right2']) {
     const current = parsed[key];
