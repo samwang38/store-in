@@ -49,6 +49,10 @@ const IPHONE_COLOR_MAP = {
   'LAVENDER': '薰衣草紫',
   'SAGE': '鼠尾草綠',
   'MIST BLUE': '青霧藍',
+  'BURGUNDY': '紅色',
+  'GLACIER': '藍色',
+  'STAR WHITE': '星光白',
+  'NIGHT SKY': '夜空色',
 };
 
 function enColorToChinese(colorStr) {
@@ -67,7 +71,7 @@ function iphoneColorToChinese(colorStr) {
 }
 
 function parseiPhone(partCode, name) {
-  const prodMatch = name.match(/iPhone\s+(\d+\w*(?:\s+(?:Pro\s+Max|Pro|Plus|mini))?)/i);
+  const prodMatch = name.match(/iPhone\s+(Duo|\d+\w*(?:\s+(?:Pro\s+Max|Pro|Plus|mini))?)/i);
   const product = prodMatch ? prodMatch[1].trim() : 'iPhone';
   const storageMatch = name.match(/(\d+(?:GB|TB))/i);
   const storage = storageMatch ? storageMatch[1] : '';
